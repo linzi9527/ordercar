@@ -67,6 +67,15 @@ public class DrivingAccountController {
     }
 
     //驾校维护列表
+
+    /**
+     *
+     * @param searchKey
+     * @param startIndex 第几页
+     * @param count 每页条数
+     * @param resp
+     * @return
+     */
     @RequestMapping(value = "/listAccount")
     @ResponseBody
     public Map<String,Object> Account(String searchKey,int startIndex,int count, HttpServletResponse resp){
@@ -76,7 +85,10 @@ public class DrivingAccountController {
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         String SQL="",limit="";
-        if(startIndex>=0&&count>0){limit="  limit "+startIndex+","+count;}
+        if(startIndex>=0&&count>0){
+            startIndex=startIndex*count;//当前从那条数据开始，向后找count条
+            limit="  limit "+startIndex+","+count;
+        }
         if(StringUtil.isEmpty(searchKey)){
             SQL=" where 1=1 order by createdate desc";
         }else{
@@ -87,7 +99,11 @@ public class DrivingAccountController {
             resultData.put("code", 200);//成功
             resultData.put("info", "操作成功！");
             resultData.put("list", list);
-            resultData.put("datacount", (list!=null&&list.size()>0)?list.size():0);
+            resultData.put("datacount", 0);
+            if(list!=null) {
+                List<DrivingAccount> listp = (List<DrivingAccount>) baseDao.queryList(DrivingAccount.class, SQL, false);
+                resultData.put("datacount",  listp.size());
+            }
         } catch (Exception e) {
             log.error("驾校账户列表信息异常："+e);
         }
