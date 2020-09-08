@@ -18,6 +18,8 @@ public class TimeSlot {
     private String id;
     @Colum(columName="drivingId",isNUll=false,type= Colum.ObjTypes.VARCHAR)
     private String drivingId; //驾校id
+    @Colum(columName="type",isNUll=false,type= Colum.ObjTypes.VARCHAR)
+    private String type;//科目:0-科目二 1-科目三
     @Colum(columName="startTime",isNUll=false,type= Colum.ObjTypes.VARCHAR)
     private String startTime; //开始时间段
     @Colum(columName="endTime",isNUll=false,type= Colum.ObjTypes.VARCHAR)
