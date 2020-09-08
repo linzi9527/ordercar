@@ -86,7 +86,7 @@ public class DrivingAccountController {
         resultData.put("info", "操作失败！");
         String SQL="",limit="";
         if(startIndex>=0&&count>0){
-            startIndex=startIndex*count;//当前从那条数据开始，向后找count条
+            startIndex=(startIndex-1)*count;//当前从那条数据开始，向后找count条
             limit="  limit "+startIndex+","+count;
         }
         if(StringUtil.isEmpty(searchKey)){

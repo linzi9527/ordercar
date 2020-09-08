@@ -86,7 +86,10 @@ public class CarManagerController {
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         String SQL="",limit="",orderby="";
-        if(carParams.getStartIndex()>=0&&carParams.getCount()>0){limit="  limit "+carParams.getStartIndex()+","+carParams.getCount();}
+        if(carParams.getStartIndex()>=0&&carParams.getCount()>0){
+            int startIndex=(carParams.getStartIndex()-1)*carParams.getCount();//当前从那条数据开始，向后找count条
+            limit="  limit "+startIndex+","+carParams.getCount();
+        }
         if(StringUtil.isEmpty(carParams.getIsOrderNo())){
             orderby=" and status='1' order by createtime desc";
         }else{
