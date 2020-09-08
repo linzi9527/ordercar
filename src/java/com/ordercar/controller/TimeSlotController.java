@@ -90,7 +90,7 @@ public class TimeSlotController {
         return resultData;
     }
     /**
-     * 新增时间段
+     * 更新时间段
      * @param timeSlot
      * @param resp
      * @return
