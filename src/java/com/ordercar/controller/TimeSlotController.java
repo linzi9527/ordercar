@@ -148,4 +148,37 @@ public class TimeSlotController {
         }
         return resultData;
     }
+    /**
+     * 批量启用、批量停用时间段:1/0
+     * @param ids
+     * @param status
+     * @return
+     */
+    @RequestMapping(value = "/batchopenTimeSlot",method = RequestMethod.POST,consumes = "application/x-www-form-urlencoded;charset=UTF-8")
+    @ResponseBody
+    public Map<String,Object> batchopenTimeSlot(@RequestParam String ids,@RequestParam String status, HttpServletResponse resp){
+        AllowOrigin.AllowOrigin(resp);
+        log.info("ids:"+ids+"==status:"+status);
+        resultData.clear();
+        resultData.put("code", 400);//失败
+        resultData.put("info", "操作失败！");
+        if(ids!=null&&status!=null){
+            try {
+                String str[] = ids.split(",");
+                String openTime ="";
+                if("1".equals(status)){
+                    openTime = DateUtil.getCurDate();// 启用时间
+                }
+                for(int i = 0;i<str.length;i++){
+                    String updateSql = "UPDATE `ordercar`.`tbl_time_slot` SET  `status`='"+status+"', `openTime`='"+openTime+"' WHERE `id`='"+str[i]+"'";
+                    baseDao.executeCUD(updateSql);
+                }
+                resultData.put("code", 200);//成功
+                resultData.put("info", "操作成功！");
+            } catch (Exception e) {
+                log.error("新增驾校账户信息异常："+e);
+            }
+        }
+        return resultData;
+    }
 }
