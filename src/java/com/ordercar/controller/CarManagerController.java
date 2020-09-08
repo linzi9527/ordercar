@@ -184,6 +184,29 @@ public class CarManagerController {
         return resultData;
     }
 
+    //根据id启用车辆
+    @RequestMapping(value = "/normalCarInfo")
+    @ResponseBody
+    public Map<String,Object> normalCarInfo(String id, HttpServletResponse resp){
+        AllowOrigin.AllowOrigin(resp);
+        log.info("根据id启用车辆id:"+id);
+        resultData.clear();
+        resultData.put("code", 400);//失败
+        resultData.put("info", "操作失败！");
+        if(!StringUtil.isEmpty(id)){
+            try {
+                CarInfo carInfo= (CarInfo) baseDao.get(id,CarInfo.class,false);
+                carInfo.setStatus("1");//启用
+                baseDao.update(carInfo);
+                resultData.put("code", 200);//成功
+                resultData.put("info", "操作成功！");
+            } catch (Exception e) {
+                log.error("根据id启用车辆异常："+e);
+            }
+        }
+        return resultData;
+    }
+
 
     //批量根据id停用车辆
     @RequestMapping(value = "/stopMutiCarInfo")
