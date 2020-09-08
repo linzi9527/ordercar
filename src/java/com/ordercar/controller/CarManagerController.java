@@ -185,10 +185,10 @@ public class CarManagerController {
 
 
     //批量根据id停用车辆
-    //@RequestMapping(value = "/stopMutiCarInfo")
-    @RequestMapping(value = "/stopMutiCarInfo",method = RequestMethod.GET,consumes = "application/x-www-form-urlencoded;charset=UTF-8")
+    @RequestMapping(value = "/stopMutiCarInfo")
+    //@RequestMapping(value = "/stopMutiCarInfo",method = RequestMethod.GET,consumes = "application/x-www-form-urlencoded;charset=UTF-8")
     @ResponseBody
-    public Map<String,Object> stopMutiCarInfo(String[] ids, HttpServletResponse resp){
+    public Map<String,Object> stopMutiCarInfo(@RequestParam("ids[]") String[] ids, HttpServletResponse resp){
         AllowOrigin.AllowOrigin(resp);
         log.info("批量根据id停用车辆ids:"+ids.toString());
         resultData.clear();
