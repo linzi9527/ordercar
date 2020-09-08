@@ -31,7 +31,7 @@ public class TimeSlotController {
     // 时间段信息列表
     @RequestMapping(value = "/listTimeSlot")
     @ResponseBody
-    public Page<TimeSlot> listTimeSlot(@RequestParam int pageNow, @RequestParam int pageCount, String status, HttpServletResponse resp){
+    public Page<TimeSlot> listTimeSlot(@RequestParam int pageNow, @RequestParam int pageCount,@RequestParam String type,@RequestParam String status, HttpServletResponse resp){
         AllowOrigin.AllowOrigin(resp);
         log.info("pageNow:"+pageNow+",pageCount:"+pageCount);
         Page<TimeSlot> page = new Page<TimeSlot>();
@@ -42,6 +42,9 @@ public class TimeSlotController {
             String sql = "select * from tbl_time_slot where 1 = 1 ";
             if(null!=status && "" != status){
                 sql = sql +" tbl_time_slot.status = '"+status+"'";
+            }
+            if(null!=type && "" != type){
+                sql = sql +" tbl_time_slot.type = '"+type+"'";
             }
             sql = sql +" ORDER BY tbl_time_slot.createTime DESC";
             List<TimeSlot> list= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql+" limit "+ strat +","+ page.getPageSize(),false);
