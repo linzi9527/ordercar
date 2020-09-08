@@ -1,0 +1,11 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="ArquillianClassEnabled" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ArquillianDeploymentAbsent" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ArquillianDeploymentReturnType" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ArquillianDeploymentSignature" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="ArquillianTooManyDeployment" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="JavadocReference" enabled="true" level="WARNING" enabled_by_default="true" />
+  </profile>
+</component>

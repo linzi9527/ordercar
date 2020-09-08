@@ -29,7 +29,8 @@ $('#btn').click(function () {
         "createdate":"2020-09-07"
     };
    // paramsJson ={"id":"car001","carname":"周末班训练C1","carimg":"/001.jpg","cartype":"C1","orderno":1,"status":"1","belong":"100010009","createtime":"2020-09-07 10:20:19"};
-    $.ajax({
+ $.post("${baseUrl}v1/addAccount",paramsJson,fun_call_default);
+    /*   $.ajax({
         type:"POST",
         url:"${baseUrl}v1/addAccount",
         //url:"${baseUrl}v1/addCarInfo",
@@ -37,7 +38,7 @@ $('#btn').click(function () {
         dataType:"json",  // 预期服务器返回的数据类型。如果不指定，jQuery 将自动根据 HTTP 包 MIME 信息来智能判断，比如XML MIME类型就被识别为XML。
         data:JSON.stringify(paramsJson),
         success:fun_call_default
-    });
+    });*/
     function fun_call_default(res) {
         console.log(res);
     }
