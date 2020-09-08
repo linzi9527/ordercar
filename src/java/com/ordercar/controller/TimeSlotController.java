@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * 时间段信息表
+ */
 @Slf4j
 @Controller
 @RequestMapping("/v1")
@@ -31,7 +34,8 @@ public class TimeSlotController {
     // 时间段信息列表
     @RequestMapping(value = "/listTimeSlot")
     @ResponseBody
-    public Page<TimeSlot> listTimeSlot(@RequestParam int pageNow, @RequestParam int pageCount,@RequestParam String type,@RequestParam String status, HttpServletResponse resp){
+    public Page<TimeSlot> listTimeSlot(@RequestParam int pageNow, @RequestParam int pageCount,@RequestParam String drivingId,
+                                       @RequestParam String type,@RequestParam String status, HttpServletResponse resp){
         AllowOrigin.AllowOrigin(resp);
         log.info("pageNow:"+pageNow+",pageCount:"+pageCount);
         Page<TimeSlot> page = new Page<TimeSlot>();
@@ -41,10 +45,13 @@ public class TimeSlotController {
             int strat=(page.getPageNow()-1)*page.getPageSize();
             String sql = "select * from tbl_time_slot where 1 = 1 ";
             if(null!=status && "" != status){
-                sql = sql +" tbl_time_slot.status = '"+status+"'";
+                sql = sql +" and tbl_time_slot.status = '"+status+"'";
             }
             if(null!=type && "" != type){
-                sql = sql +" tbl_time_slot.type = '"+type+"'";
+                sql = sql +" and tbl_time_slot.type = '"+type+"'";
+            }
+            if(null!=drivingId && "" != drivingId){
+                sql = sql +" and tbl_time_slot.drivingId = '"+drivingId+"'";
             }
             sql = sql +" ORDER BY tbl_time_slot.createTime DESC";
             List<TimeSlot> list= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql+" limit "+ strat +","+ page.getPageSize(),false);
@@ -62,7 +69,7 @@ public class TimeSlotController {
         return page;
     }
 
-    /**
+    /**ih
      * 新增时间段
      * @param timeSlot
      * @param resp
@@ -81,13 +88,22 @@ public class TimeSlotController {
                 timeSlot.setId(UUID.randomUUID().toString().replaceAll("-",""));
                 timeSlot.setStatus("1");
                 timeSlot.setCreateTime(DateUtil.getCurDateTime());
-                boolean flag = baseDao.save(timeSlot);
-                if(flag){
-                    resultData.put("code", 200);//成功
-                    resultData.put("info", "操作成功！");
+                String sql = "select * from tbl_time_slot where (startTime > '"+timeSlot.getStartTime()+"' AND startTime < '"+timeSlot.getEndTime()+"')" +
+                        " OR (startTime < '"+timeSlot.getStartTime()+"' AND endTime > '"+timeSlot.getEndTime()+"') " +
+                        " OR (endTime > '"+timeSlot.getStartTime()+"' AND endTime < '"+timeSlot.getEndTime()+"')";
+                List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
+                if(null!=countList&&countList.size()>0){
+                    resultData.put("code", 400);//失败
+                    resultData.put("info", "操作失败,存在交集时间段！");
+                }else{
+                    boolean flag = baseDao.save(timeSlot);
+                    if(flag){
+                        resultData.put("code", 200);//成功
+                        resultData.put("info", "操作成功！");
+                    }
                 }
             } catch (Exception e) {
-                log.error("新增驾校账户信息异常："+e);
+                log.error("新增时间段信息异常："+e);
             }
         }
         return resultData;
@@ -108,13 +124,22 @@ public class TimeSlotController {
         resultData.put("info", "操作失败！");
         if(timeSlot!=null){
             try {
-                boolean flag = baseDao.update(timeSlot);
-                if(flag){
-                    resultData.put("code", 200);//成功
-                    resultData.put("info", "操作成功！");
+                String sql = "select * from tbl_time_slot where (startTime > '"+timeSlot.getStartTime()+"' AND startTime < '"+timeSlot.getEndTime()+"')" +
+                        " OR (startTime < '"+timeSlot.getStartTime()+"' AND endTime > '"+timeSlot.getEndTime()+"') " +
+                        " OR (endTime > '"+timeSlot.getStartTime()+"' AND endTime < '"+timeSlot.getEndTime()+"') and id !='"+timeSlot.getId()+"'";
+                List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
+                if(null!=countList&&countList.size()>0){
+                    resultData.put("code", 400);//失败
+                    resultData.put("info", "操作失败,存在交集时间段！");
+                }else{
+                    boolean flag = baseDao.update(timeSlot);
+                    if(flag){
+                        resultData.put("code", 200);//成功
+                        resultData.put("info", "操作成功！");
+                    }
                 }
             } catch (Exception e) {
-                log.error("新增驾校账户信息异常："+e);
+                log.error("更新时间段信息异常："+e);
             }
         }
         return resultData;
@@ -146,7 +171,7 @@ public class TimeSlotController {
                     resultData.put("info", "操作成功！");
                 }
             } catch (Exception e) {
-                log.error("新增驾校账户信息异常："+e);
+                log.error(" 启用、停用时间段信息异常："+e);
             }
         }
         return resultData;
@@ -179,7 +204,7 @@ public class TimeSlotController {
                 resultData.put("code", 200);//成功
                 resultData.put("info", "操作成功！");
             } catch (Exception e) {
-                log.error("新增驾校账户信息异常："+e);
+                log.error("批量启用、批量停用时间段信息异常："+e);
             }
         }
         return resultData;
