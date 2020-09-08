@@ -3,11 +3,13 @@ package com.ordercar.controller;
 import com.ordercar.utils.AllowOrigin;
 import com.ordercar.vo.DrivingAccount;
 import com.summaryday.framework.d.IBaseDao;
+import com.summaryday.framework.db.DateUtil;
 import com.summaryday.framework.db.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 后台维护驾校基本信息和账号信息
@@ -37,11 +40,12 @@ public class DrivingAccountController {
      * 当需要传递Json格式的数据是，后端接收的方法@RequestBody
      * 返回数据@ResponseBody即以json格式返回Map<String,Object> resultData
      * 415问题已经处理
-     *   // @RequestMapping("/addAccount")
      */
     @RequestMapping(value = "/addAccount",method = RequestMethod.POST,consumes = "application/x-www-form-urlencoded;charset=UTF-8")
+    //@RequestMapping("/addAccount")
     @ResponseBody
     public Map<String,Object> Account(DrivingAccount drivingAccount, HttpServletResponse resp){
+    //public Map<String,Object> Account(@RequestBody DrivingAccount drivingAccount, HttpServletResponse resp){
         AllowOrigin.AllowOrigin(resp);
         log.info("drivingAccount:"+drivingAccount);
         resultData.clear();
@@ -49,6 +53,9 @@ public class DrivingAccountController {
         resultData.put("info", "操作失败！");
         if(drivingAccount!=null){
             try {
+                drivingAccount.setId(UUID.randomUUID().toString().replaceAll("-",""));
+                drivingAccount.setStatus("1");
+                drivingAccount.setCreatedate(DateUtil.getCurDate());
                 baseDao.save(drivingAccount);
                 resultData.put("code", 200);//成功
                 resultData.put("info", "操作成功！");
@@ -73,7 +80,7 @@ public class DrivingAccountController {
         if(StringUtil.isEmpty(searchKey)){
             SQL=" where 1=1 order by createdate desc";
         }else{
-            SQL=" where drivingname='"+searchKey+"' OR concat='"+searchKey+"' OR phone='"+searchKey+"' order by createdate desc ";
+            SQL=" where drivingname like '%"+searchKey+"%' OR concat like '%"+searchKey+"%' OR phone like'%"+searchKey+"%' order by createdate desc ";
         }
         try {
             List<DrivingAccount> list= (List<DrivingAccount>) baseDao.queryList(DrivingAccount.class,SQL+limit,false);
