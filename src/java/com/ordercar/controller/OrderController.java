@@ -86,7 +86,7 @@ public class OrderController {
                 page.setRowCount(0);
             }
         } catch (Exception e) {
-            log.error("时间段信息表列表信息异常："+e);
+            log.error("订单信息列表信息异常："+e);
         }
         return page;
     }
@@ -107,11 +107,11 @@ public class OrderController {
             sql = sql +" ORDER BY tbl_time_slot.startTime asc";
             countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
         } catch (Exception e) {
-            log.error("时间段信息表列表信息异常："+e);
+            log.error("订单信息列表信息时间段信息列表异常："+e);
         }
         return countList;
     }
-    // 时间段信息列表
+    // 车辆信息列表
     @RequestMapping(value = "/listCarInfoOrder")
     @ResponseBody
     public List<CarInfo> listCarInfoOrder(@RequestParam String drivingId,@RequestParam String type,HttpServletResponse resp){
@@ -132,7 +132,7 @@ public class OrderController {
             sql = sql +" ORDER BY tbl_carinfo.orderno asc";
             countList= (List<CarInfo>) baseDao.queryList(CarInfo.class,sql,false);
         } catch (Exception e) {
-            log.error("时间段信息表列表信息异常："+e);
+            log.error("车辆信息列表异常："+e);
         }
         return countList;
     }
