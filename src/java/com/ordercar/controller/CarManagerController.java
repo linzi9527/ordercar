@@ -108,6 +108,10 @@ public class CarManagerController {
             resultData.put("info", "操作成功！");
             resultData.put("list", list);
             resultData.put("datacount", (list!=null&&list.size()>0)?list.size():0);
+            if(list!=null) {
+                List<CarInfo> listp = (List<CarInfo>) baseDao.queryList(CarInfo.class, SQL, false);
+                resultData.put("datacount",  listp.size());
+            }
         } catch (Exception e) {
             log.error("驾校账户列表信息异常："+e);
         }
@@ -215,7 +219,33 @@ public class CarManagerController {
         return resultData;
     }
 
-
+    //批量根据id启用车辆
+    @RequestMapping(value = "/normalMutiCarInfo")
+    //@RequestMapping(value = "/stopMutiCarInfo",method = RequestMethod.GET,consumes = "application/x-www-form-urlencoded;charset=UTF-8")
+    @ResponseBody
+    public Map<String,Object> normalMutiCarInfo(@RequestParam("ids[]") String[] ids, HttpServletResponse resp){
+        AllowOrigin.AllowOrigin(resp);
+        log.info("批量根据id启用车辆ids:"+ids.toString());
+        resultData.clear();
+        resultData.put("code", 400);//失败
+        resultData.put("info", "操作失败！");
+        if(null!=ids&&ids.length>0){
+            try {
+                CarInfo[] obj=new CarInfo[ids.length];
+                for(int i=0;i<ids.length;i++){
+                    CarInfo carInfo= (CarInfo) baseDao.get(ids[i],CarInfo.class,false);
+                    carInfo.setStatus("1");//启用
+                    obj[i]=carInfo;
+                }
+                baseDao.updateByTransaction(obj);
+                resultData.put("code", 200);//成功
+                resultData.put("info", "操作成功！");
+            } catch (Exception e) {
+                log.error("根据id启用车辆异常："+e);
+            }
+        }
+        return resultData;
+    }
 
     //根据id启用车辆
     @RequestMapping(value = "/normalCarInfo")
