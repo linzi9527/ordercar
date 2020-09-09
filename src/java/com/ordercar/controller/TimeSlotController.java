@@ -53,7 +53,7 @@ public class TimeSlotController {
             if(null!=drivingId && "" != drivingId){
                 sql = sql +" and tbl_time_slot.drivingId = '"+drivingId+"'";
             }
-            sql = sql +" ORDER BY tbl_time_slot.createTime DESC";
+            sql = sql +" ORDER BY tbl_time_slot.startTime asc";
             List<TimeSlot> list= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql+" limit "+ strat +","+ page.getPageSize(),false);
             page.setList(list);
             List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
