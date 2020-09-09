@@ -98,7 +98,7 @@ public class CarManagerController {
         }
 
         if(StringUtil.isEmpty(carParams.getSearchKey())){
-            SQL=" where 1=1 and km='"+carParams.getKm()+"' "+orderby;
+            SQL=" where 1=1 and km='"+carParams.getKm()+"' and cartype='"+carParams.getCarType()+"' "+orderby;
         }else{
             SQL=" where  km='"+carParams.getKm()+"' and carname like '%"+carParams.getSearchKey()+"%' and cartype='"+carParams.getCarType()+"' "+orderby;
         }
