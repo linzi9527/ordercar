@@ -88,9 +88,12 @@ public class TimeSlotController {
                 timeSlot.setId(UUID.randomUUID().toString().replaceAll("-",""));
                 timeSlot.setStatus("1");
                 timeSlot.setCreateTime(DateUtil.getCurDateTime());
-                String sql = "select * from tbl_time_slot where (startTime > '"+timeSlot.getStartTime()+"' AND startTime < '"+timeSlot.getEndTime()+"')" +
-                        " OR (startTime < '"+timeSlot.getStartTime()+"' AND endTime > '"+timeSlot.getEndTime()+"') " +
-                        " OR (endTime > '"+timeSlot.getStartTime()+"' AND endTime < '"+timeSlot.getEndTime()+"')";
+                String sql = "select * from tbl_time_slot where (" +
+                        "(startTime <= '"+timeSlot.getStartTime()+"' and endTime > '"+timeSlot.getStartTime()+"')" +
+                        "or(startTime < '"+timeSlot.getEndTime()+"' and endTime >= '"+timeSlot.getEndTime()+"')" +
+                        "or(startTime >= '"+timeSlot.getStartTime()+"' and endTime <= '"+timeSlot.getEndTime()+"')" +
+                        "or(startTime <= '"+timeSlot.getStartTime()+"' and endTime >= '"+timeSlot.getEndTime()+"'))";
+                sql = sql +" and type = '"+timeSlot.getType()+"' AND drivingId = '"+timeSlot.getDrivingId()+"'";
                 List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
                 if(null!=countList&&countList.size()>0){
                     resultData.put("code", 400);//失败
@@ -124,9 +127,12 @@ public class TimeSlotController {
         resultData.put("info", "操作失败！");
         if(timeSlot!=null){
             try {
-                String sql = "select * from tbl_time_slot where (startTime > '"+timeSlot.getStartTime()+"' AND startTime < '"+timeSlot.getEndTime()+"')" +
-                        " OR (startTime < '"+timeSlot.getStartTime()+"' AND endTime > '"+timeSlot.getEndTime()+"') " +
-                        " OR (endTime > '"+timeSlot.getStartTime()+"' AND endTime < '"+timeSlot.getEndTime()+"') and id !='"+timeSlot.getId()+"'";
+                String sql = "select * from tbl_time_slot where (" +
+                        "(startTime <= '"+timeSlot.getStartTime()+"' and endTime > '"+timeSlot.getStartTime()+"')" +
+                        "or(startTime < '"+timeSlot.getEndTime()+"' and endTime >= '"+timeSlot.getEndTime()+"')" +
+                        "or(startTime >= '"+timeSlot.getStartTime()+"' and endTime <= '"+timeSlot.getEndTime()+"')" +
+                        "or(startTime <= '"+timeSlot.getStartTime()+"' and endTime >= '"+timeSlot.getEndTime()+"'))";
+                sql = sql +" and id!='"+timeSlot.getId()+"' and type = '"+timeSlot.getType()+"' AND drivingId = '"+timeSlot.getDrivingId()+"'";
                 List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
                 if(null!=countList&&countList.size()>0){
                     resultData.put("code", 400);//失败
@@ -209,4 +215,5 @@ public class TimeSlotController {
         }
         return resultData;
     }
+
 }
