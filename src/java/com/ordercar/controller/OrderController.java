@@ -1,7 +1,10 @@
 package com.ordercar.controller;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.ordercar.utils.AllowOrigin;
+import com.ordercar.utils.ExcelUtil;
 import com.ordercar.vo.CarInfo;
 import com.ordercar.vo.OrderVo;
 import com.ordercar.vo.Page;
@@ -15,10 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 订单列表
@@ -89,6 +89,81 @@ public class OrderController {
             log.error("订单信息列表信息异常："+e);
         }
         return page;
+    }
+    // 订单信息列表Excel导出
+    @RequestMapping(value = "/listOrderExcel")
+    @ResponseBody
+    public void listOrderExcel(@RequestParam String drivingId, @RequestParam String type,String keyword,String status,String carinfoId,String timeSlotId,String startTime,String endTime,
+                                   HttpServletResponse resp){
+        AllowOrigin.AllowOrigin(resp);
+        try {
+            String sql = "SELECT tbl_order.id,tbl_order.orderId,tbl_order.`name`,tbl_order.tel,tbl_carinfo.carimg,tbl_carinfo.carname," +
+                    " tbl_carinfo.cartype,tbl_time_slot.startTime,tbl_time_slot.endTime,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
+                    " LEFT JOIN tbl_carinfo ON tbl_order.carinfoId = tbl_carinfo.id" +
+                    " LEFT JOIN tbl_time_slot ON tbl_order.timeSlotId = tbl_time_slot.id where 1 = 1 ";
+            if(null!=type && "" != type){
+                sql = sql +" and tbl_order.type = '"+type+"'";
+            }
+            if(null!=drivingId && "" != drivingId){
+                sql = sql +" and tbl_order.drivingId = '"+drivingId+"'";
+            }
+            if(null!=keyword && "" != keyword){
+                sql = sql +" and (tbl_order.tel like '%"+keyword+"%' or tbl_order.`name` like '%"+keyword+"%' or tbl_order.orderId like '%"+keyword+"%')";
+            }
+            if(null!=status && "" != status){
+                sql = sql +" and tbl_order.status = '"+status+"'";//状态:0已取消，1已预约
+            }
+            if(null!=carinfoId && "" != carinfoId){
+                sql = sql +" and tbl_order.carinfocId = '"+carinfoId+"'";//车辆ID
+            }
+            if(null!=timeSlotId && "" != timeSlotId){
+                sql = sql +" and tbl_order.timeSlotId = '"+timeSlotId+"'";// 预约时段ID
+            }
+            if(null != startTime && "" != startTime){
+                sql= sql +" and tbl_order.time >= '"+startTime+"'";
+            }
+            if(null != endTime && "" != endTime){
+                sql= sql + " and tbl_order.time <= '"+endTime+"'";
+            }
+            sql = sql +" ORDER BY tbl_order.createTime DESC";
+            List<OrderVo> list= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo","tbl_time_slot"},sql,false);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            Map<String, Object> bean = null;
+            OrderVo orderVo = null;
+            if(null!=list&&list.size()>0){
+                for (int i = 0;i<list.size();i++) {
+                    bean = new HashMap<>();
+                    orderVo = list.get(i);
+                    bean.put("id", i+1);
+                    bean.put("orderId", orderVo.getOrderId());
+                    bean.put("name", orderVo.getName());
+                    bean.put("tel", orderVo.getTel());
+                    bean.put("carname", orderVo.getCarname());
+                    bean.put("cartype", orderVo.getCartype());
+                    bean.put("startTimeBean", orderVo.getStartTime()+"-"+orderVo.getEndTime());
+                    bean.put("time", orderVo.getTime());
+                    bean.put("statusStr", orderVo.getStatus().equals("0")?"已取消":"已预约");
+                    bean.put("remarks", orderVo.getRemarks());
+                    mapList.add(bean);
+                }
+            }
+            JSONArray ja = JSONArray.parseArray(JSON.toJSONString(mapList));
+            Map<String,String> headMap = new LinkedHashMap<>();
+            headMap.put("id","序号");
+            headMap.put("orderId","订单编号");
+            headMap.put("name","姓名");
+            headMap.put("tel","手机号");
+            headMap.put("carname","车的名称");
+            headMap.put("cartype","车的类型");
+            headMap.put("startTimeBean","预约时段");//
+            headMap.put("time","预约时间");
+            headMap.put("statusStr","预约状态");//
+            headMap.put("remarks","备注");
+            String title = "订单信息列表";
+            ExcelUtil.downloadExcelFile(title,headMap,ja,resp);
+        } catch (Exception e) {
+            log.error("订单信息列表Excel导出异常："+e);
+        }
     }
     // 时间段信息列表
     @RequestMapping(value = "/listTimeSlotOrder")
