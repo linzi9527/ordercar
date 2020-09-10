@@ -52,7 +52,7 @@ public class LoginController {
             if(null!=drivingAccount){
                 resultData.put("code", 200);//成功
                 resultData.put("info", "登录成功！");
-                resultData.put("data", drivingAccount.getId());
+                resultData.put("data", drivingAccount);
             }
         } catch (Exception e) {
             log.error("登录异常："+e);

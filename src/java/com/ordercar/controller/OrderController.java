@@ -48,7 +48,7 @@ public class OrderController {
             page.setRowCount(pageCount);
             int strat=(page.getPageNow()-1)*page.getPageSize();
             String sql = "SELECT tbl_order.id,tbl_order.orderId,tbl_order.`name`,tbl_order.tel,tbl_carinfo.carimg,tbl_carinfo.carname," +
-                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
+                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,tbl_order.time,tbl_order.`status`,tbl_order.remarks,tbl_order.createTime FROM tbl_order " +
                     " LEFT JOIN tbl_carinfo ON tbl_order.carinfoId = tbl_carinfo.id" +
                     " where 1 = 1 ";
             if(null!=type && "" != type){
@@ -76,9 +76,9 @@ public class OrderController {
                 sql= sql + " and tbl_order.time <= '"+endTime+"'";
             }
             sql = sql +" GROUP BY tbl_order.orderId ORDER BY tbl_order.createTime DESC";
-            List<OrderVo> list= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo","tbl_time_slot"},sql+" limit "+ strat +","+ page.getPageSize(),false);
+            List<OrderVo> list= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo"},sql+" limit "+ strat +","+ page.getPageSize(),false);
             page.setList(list);
-            List<OrderVo> countList= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo","tbl_time_slot"},sql,false);
+            List<OrderVo> countList= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo"},sql,false);
             //总记录数
             if(null!=countList){
                 page.setRowCount(list.size());
@@ -98,7 +98,7 @@ public class OrderController {
         AllowOrigin.AllowOrigin(resp);
         try {
             String sql = "SELECT tbl_order.id,tbl_order.orderId,tbl_order.`name`,tbl_order.tel,tbl_carinfo.carimg,tbl_carinfo.carname," +
-                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
+                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,,tbl_order.time,tbl_order.`status`,tbl_order.remarks,tbl_order.createTime FROM tbl_order " +
                     " LEFT JOIN tbl_carinfo ON tbl_order.carinfoId = tbl_carinfo.id" +
                     " where 1 = 1 ";
             if(null!=type && "" != type){
@@ -126,7 +126,7 @@ public class OrderController {
                 sql= sql + " and tbl_order.time <= '"+endTime+"'";
             }
             sql = sql +" ORDER BY tbl_order.createTime DESC";
-            List<OrderVo> list= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo","tbl_time_slot"},sql,false);
+            List<OrderVo> list= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo"},sql,false);
             List<Map<String, Object>> mapList = new ArrayList<>();
             Map<String, Object> bean = null;
             OrderVo orderVo = null;
