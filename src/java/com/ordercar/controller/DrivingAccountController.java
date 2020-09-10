@@ -90,9 +90,9 @@ public class DrivingAccountController {
             limit="  limit "+startIndex+","+count;
         }
         if(StringUtil.isEmpty(searchKey)){
-            SQL=" where 1=1 order by createdate desc";
+            SQL=" where status!='-1' and 1=1 order by createdate desc";
         }else{
-            SQL=" where drivingname like '%"+searchKey+"%' OR concat like '%"+searchKey+"%' OR phone like'%"+searchKey+"%' order by createdate desc ";
+            SQL=" where status!='-1' and (drivingname like '%"+searchKey+"%' OR concat like '%"+searchKey+"%' OR phone like'%"+searchKey+"%') order by createdate desc ";
         }
         try {
             List<DrivingAccount> list= (List<DrivingAccount>) baseDao.queryList(DrivingAccount.class,SQL+limit,false);
