@@ -80,7 +80,7 @@ public class RemainderStatisticsController {
         for(int i = 0;i<list.size();i++){
             RemainderVo remainderVo = list.get(i);
             remainderVo.setAllNumber(allNumber+"");
-            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+remainderVo.getId()+"' AND tbl_order.time = '"+time+"'";
+            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+remainderVo.getId()+"' AND tbl_order.`status` = '1' AND tbl_order.time = '"+time+"'";
             List<Order> ordersList= (List<Order>) baseDao.queryList(Order.class,sql,false);
             if(null!=ordersList&&ordersList.size()>0){
                 remainderVo.setReservedNumber(ordersList.size()+"");
