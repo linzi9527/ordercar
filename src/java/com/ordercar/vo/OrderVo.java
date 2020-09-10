@@ -15,4 +15,5 @@ public class OrderVo {
     private String time;//预约时间
     private String status;//0已取消，1已预约
     private String remarks;//备注
+    private String createTime;//创建时间
 }

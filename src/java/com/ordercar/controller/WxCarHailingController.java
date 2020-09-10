@@ -93,14 +93,14 @@ public class WxCarHailingController {
         }
         for(int i = 0;i<list.size();i++){
             CarInfoVo carInfoVo = list.get(i);
-            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"'";
+            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"' and tbl_order.status = '1'";
             List<Order> historyOrdersList= (List<Order>) baseDao.queryList(Order.class,sql,false);
             if(null!=historyOrdersList&&historyOrdersList.size()>0){
                 carInfoVo.setHistoryNumber(historyOrdersList.size()+"");
             }else{
                 carInfoVo.setHistoryNumber("0");
             }
-            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"' AND tbl_order.time = '"+time+"'";
+            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"' and tbl_order.status = '1' AND tbl_order.time = '"+time+"'";
             List<Order> ordersList= (List<Order>) baseDao.queryList(Order.class,sql,false);
             if(null!=ordersList&&ordersList.size()>0){
                 int surplusNumber = allNumber-ordersList.size();
@@ -202,6 +202,49 @@ public class WxCarHailingController {
             if(flag){
                 resultData.put("code", 200);//成功
                 resultData.put("info", "预约成功！");
+            }
+        } catch (Exception e) {
+            log.error("获取设置时间段配置信息异常："+e);
+        }
+        return resultData;
+    }
+    // 订单信息列表
+    @RequestMapping(value = "/userListOrder")
+    @ResponseBody
+    public List<OrderVo> userListOrder(@RequestParam String openId, HttpServletResponse resp) {
+        AllowOrigin.AllowOrigin(resp);
+        log.info("openId:" + openId);
+        List<OrderVo> list = new ArrayList<>();
+        try {
+            String sql = "SELECT tbl_order.id,tbl_order.orderId,tbl_order.`name`,tbl_order.tel,tbl_carinfo.carimg,tbl_carinfo.carname," +
+                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,tbl_order.time,tbl_order.`status`,tbl_order.remarks,tbl_order.createTime FROM tbl_order " +
+                    " LEFT JOIN tbl_carinfo ON tbl_order.carinfoId = tbl_carinfo.id" +
+                    " where 1 = 1 ";
+            if (null != openId && "" != openId) {
+                sql = sql + " and tbl_order.openId = '" + openId + "'";
+            }
+            sql = sql + " GROUP BY tbl_order.orderId ORDER BY tbl_order.createTime DESC";
+            list = (List<OrderVo>) baseDao.queryTables(OrderVo.class, new String[]{"tbl_order", "tbl_carinfo"}, sql, false);
+        } catch (Exception e) {
+            log.error("订单信息列表信息异常：" + e);
+        }
+        return list;
+    }
+    // 取消订单
+    @RequestMapping(value = "/cancelOrder")
+    @ResponseBody
+    public Map<String,Object> cancelOrder(@RequestParam String orderId, HttpServletResponse resp) {
+        AllowOrigin.AllowOrigin(resp);
+        log.info("orderId:" + orderId);
+        resultData.clear();
+        resultData.put("code", 400);//失败
+        resultData.put("info", "操作失败！");
+        try {
+            String updateSql = "UPDATE `ordercar`.`tbl_order` SET  `status` = '0' WHERE `orderId` = '"+orderId+"'";
+            int cnt = baseDao.executeCUD(updateSql);
+            if(cnt>0){
+                resultData.put("code", 200);//成功
+                resultData.put("info", "操作成功！");
             }
         } catch (Exception e) {
             log.error("获取设置时间段配置信息异常："+e);
