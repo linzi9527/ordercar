@@ -85,7 +85,7 @@ public class RemainderStatisticsController {
             if(null!=ordersList&&ordersList.size()>0){
                 remainderVo.setReservedNumber(ordersList.size()+"");
                 int surplusNumber = allNumber-ordersList.size();
-                remainderVo.setReservedNumber(surplusNumber+"");
+                remainderVo.setSurplusNumber(surplusNumber+"");
             }else{
                 remainderVo.setReservedNumber("0");
                 remainderVo.setSurplusNumber(allNumber+"");
@@ -134,7 +134,7 @@ public class RemainderStatisticsController {
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         List<RemainderDetailVo> times = new ArrayList<>();
-        try { String sql = "SELECT * from (SELECT tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber FROM tbl_time_slot " +
+        try { String sql = "SELECT * from (SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber FROM tbl_time_slot " +
                 "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' " +
                 "WHERE tbl_time_slot.drivingId = '"+drivingId+"' ORDER BY tbl_time_slot.startTime ASC ) a";
                 times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);

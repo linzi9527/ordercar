@@ -34,6 +34,10 @@ public class Order {
     private String  status;//0已取消，1已预约
     @Colum(columName="remarks",isNUll=false,type= Colum.ObjTypes.VARCHAR)
     private String remarks;//备注
+    @Colum(columName="timeSlot",isNUll=false,type= Colum.ObjTypes.VARCHAR)
+    private String timeSlot;//时间段，拼接
+    @Colum(columName="openId",isNUll=false,type= Colum.ObjTypes.VARCHAR)
+    private String openId;//openId--微信唯一标识
     @Colum(columName="createTime",isNUll=false,type= Colum.ObjTypes.VARCHAR)
     private String  createTime;//创建时间
 }

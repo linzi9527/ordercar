@@ -48,9 +48,9 @@ public class OrderController {
             page.setRowCount(pageCount);
             int strat=(page.getPageNow()-1)*page.getPageSize();
             String sql = "SELECT tbl_order.id,tbl_order.orderId,tbl_order.`name`,tbl_order.tel,tbl_carinfo.carimg,tbl_carinfo.carname," +
-                    " tbl_carinfo.cartype,tbl_time_slot.startTime,tbl_time_slot.endTime,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
+                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
                     " LEFT JOIN tbl_carinfo ON tbl_order.carinfoId = tbl_carinfo.id" +
-                    " LEFT JOIN tbl_time_slot ON tbl_order.timeSlotId = tbl_time_slot.id where 1 = 1 ";
+                    " where 1 = 1 ";
             if(null!=type && "" != type){
                 sql = sql +" and tbl_order.type = '"+type+"'";
             }
@@ -75,7 +75,7 @@ public class OrderController {
             if(null != endTime && "" != endTime){
                 sql= sql + " and tbl_order.time <= '"+endTime+"'";
             }
-            sql = sql +" ORDER BY tbl_order.createTime DESC";
+            sql = sql +" GROUP BY tbl_order.orderId ORDER BY tbl_order.createTime DESC";
             List<OrderVo> list= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo","tbl_time_slot"},sql+" limit "+ strat +","+ page.getPageSize(),false);
             page.setList(list);
             List<OrderVo> countList= (List<OrderVo>) baseDao.queryTables(OrderVo.class,new String[] {"tbl_order","tbl_carinfo","tbl_time_slot"},sql,false);
@@ -98,9 +98,9 @@ public class OrderController {
         AllowOrigin.AllowOrigin(resp);
         try {
             String sql = "SELECT tbl_order.id,tbl_order.orderId,tbl_order.`name`,tbl_order.tel,tbl_carinfo.carimg,tbl_carinfo.carname," +
-                    " tbl_carinfo.cartype,tbl_time_slot.startTime,tbl_time_slot.endTime,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
+                    " tbl_carinfo.cartype,GROUP_CONCAT(tbl_order.timeSlot) AS timeSlot,,tbl_order.time,tbl_order.`status`,tbl_order.remarks FROM tbl_order " +
                     " LEFT JOIN tbl_carinfo ON tbl_order.carinfoId = tbl_carinfo.id" +
-                    " LEFT JOIN tbl_time_slot ON tbl_order.timeSlotId = tbl_time_slot.id where 1 = 1 ";
+                    " where 1 = 1 ";
             if(null!=type && "" != type){
                 sql = sql +" and tbl_order.type = '"+type+"'";
             }
@@ -140,7 +140,7 @@ public class OrderController {
                     bean.put("tel", orderVo.getTel());
                     bean.put("carname", orderVo.getCarname());
                     bean.put("cartype", orderVo.getCartype());
-                    bean.put("startTimeBean", orderVo.getStartTime()+"-"+orderVo.getEndTime());
+                    bean.put("timeSlot", orderVo.getTimeSlot());
                     bean.put("time", orderVo.getTime());
                     bean.put("statusStr", orderVo.getStatus().equals("0")?"已取消":"已预约");
                     bean.put("remarks", orderVo.getRemarks());
@@ -155,7 +155,7 @@ public class OrderController {
             headMap.put("tel","手机号");
             headMap.put("carname","车的名称");
             headMap.put("cartype","车的类型");
-            headMap.put("startTimeBean","预约时段");//
+            headMap.put("timeSlot","预约时段");//
             headMap.put("time","预约时间");
             headMap.put("statusStr","预约状态");//
             headMap.put("remarks","备注");
