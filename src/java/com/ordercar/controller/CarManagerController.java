@@ -97,16 +97,36 @@ public class CarManagerController {
             limit="  limit "+startIndex+","+carParams.getCount();
         }
         if("0".equals(carParams.getIsOrderNo())){
-            orderby=" and status='"+carParams.getStatus()+"' order by createtime desc";
+            if(StringUtil.isEmpty(carParams.getStatus())){
+                orderby="  order by createtime desc";
+            }else {
+                orderby=" and status='"+carParams.getStatus()+"' order by createtime desc";
+            }
+
         }
         if("1".equals(carParams.getIsOrderNo())){
-            orderby=" and status='"+carParams.getStatus()+"' order by orderno ";
+            if(StringUtil.isEmpty(carParams.getStatus())){
+                orderby="  order by orderno ";
+            }else {
+                orderby=" and status='"+carParams.getStatus()+"' order by orderno ";
+            }
+
         }
 
         if(StringUtil.isEmpty(carParams.getSearchKey())){
-            SQL=" where 1=1 and km='"+carParams.getKm()+"' and cartype='"+carParams.getCarType()+"' "+orderby;
+            if(StringUtil.isEmpty(carParams.getCarType())){
+                SQL=" where 1=1 and km='"+carParams.getKm()+"'  "+orderby;
+            }else {
+                SQL=" where 1=1 and km='"+carParams.getKm()+"' and cartype='"+carParams.getCarType()+"' "+orderby;
+            }
+
         }else{
-            SQL=" where  km='"+carParams.getKm()+"' and carname like '%"+carParams.getSearchKey()+"%' and cartype='"+carParams.getCarType()+"' "+orderby;
+            if(StringUtil.isEmpty(carParams.getCarType())){
+                SQL=" where  km='"+carParams.getKm()+"' and carname like '%"+carParams.getSearchKey()+"%'  "+orderby;
+            }else{
+                SQL=" where  km='"+carParams.getKm()+"' and carname like '%"+carParams.getSearchKey()+"%' and cartype='"+carParams.getCarType()+"' "+orderby;
+            }
+
         }
         try {
             List<CarInfo> list= (List<CarInfo>) baseDao.queryList(CarInfo.class,SQL+limit,false);
