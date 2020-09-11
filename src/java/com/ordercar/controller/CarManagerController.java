@@ -96,9 +96,10 @@ public class CarManagerController {
             }
             limit="  limit "+startIndex+","+carParams.getCount();
         }
-        if(StringUtil.isEmpty(carParams.getIsOrderNo())){
+        if("0".equals(carParams.getIsOrderNo())){
             orderby=" and status='"+carParams.getStatus()+"' order by createtime desc";
-        }else{
+        }
+        if("1".equals(carParams.getIsOrderNo())){
             orderby=" and status='"+carParams.getStatus()+"' order by orderno ";
         }
 
