@@ -43,7 +43,7 @@ public class RemainderStatisticsController {
             page.setPageNow(pageNow);
             page.setRowCount(pageCount);
             int strat=(page.getPageNow()-1)*page.getPageSize();
-            StringBuffer sqlb = new StringBuffer("SELECT tbl_carinfo.id,tbl_carinfo.carname FROM tbl_carinfo WHERE 1 = 1");
+            StringBuffer sqlb = new StringBuffer("SELECT tbl_carinfo.id,tbl_carinfo.carname,tbl_carinfo.status FROM tbl_carinfo WHERE 1 = 1");
             if(null!=type && "" != type){
                 if("1".equals(type)){
                     sqlb.append(" and tbl_carinfo.km = '科目三'");
@@ -71,6 +71,7 @@ public class RemainderStatisticsController {
     }
     //获取已预约车辆数量
     private List<RemainderVo> getDataList(List<RemainderVo> list,String time,String drivingId,String type) throws Exception {
+        List<RemainderVo> result = new ArrayList<>();
         int allNumber = 0;
         String sql = "SELECT * from tbl_time_slot WHERE tbl_time_slot.drivingId = '"+drivingId+"' and tbl_time_slot.type = '"+type+"'  AND tbl_time_slot.`status` = '1'";
         List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
@@ -86,12 +87,16 @@ public class RemainderStatisticsController {
                 remainderVo.setReservedNumber(ordersList.size()+"");
                 int surplusNumber = allNumber-ordersList.size();
                 remainderVo.setSurplusNumber(surplusNumber+"");
+                result.add(remainderVo);
             }else{
-                remainderVo.setReservedNumber("0");
-                remainderVo.setSurplusNumber(allNumber+"");
+                if("1".equals(remainderVo.getStatus())){
+                    remainderVo.setReservedNumber("0");
+                    remainderVo.setSurplusNumber(allNumber+"");
+                    result.add(remainderVo);
+                }
             }
         }
-        return list;
+        return result;
     }
     /**
      * 获取设置时间段配置信息
