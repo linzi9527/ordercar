@@ -85,14 +85,22 @@ public class DrivingAccountController {
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         String SQL="",limit="";
+        int _startIndex=0;
+
         if(startIndex>=0&&count>0){
-            startIndex=(startIndex-1)*count;//当前从那条数据开始，向后找count条
-            limit="  limit "+startIndex+","+count;
+            //startIndex=(startIndex-1)*count;//当前从那条数据开始，向后找count条
+            if(startIndex==0){
+                _startIndex=0;//当前从那条数据开始，向后找count条
+            }else{
+                _startIndex=(startIndex-1)*count;//当前从那条数据开始，向后找count条
+            }
+            limit="  limit "+_startIndex+","+count;
         }
+
         if(StringUtil.isEmpty(searchKey)){
-            SQL=" where 1=1 order by createdate desc";
+            SQL=" where status!='-1' and 1=1 order by createdate desc";
         }else{
-            SQL=" where drivingname like '%"+searchKey+"%' OR concat like '%"+searchKey+"%' OR phone like'%"+searchKey+"%' order by createdate desc ";
+            SQL=" where status!='-1' and (drivingname like '%"+searchKey+"%' OR concat like '%"+searchKey+"%' OR phone like'%"+searchKey+"%') order by createdate desc ";
         }
         try {
             List<DrivingAccount> list= (List<DrivingAccount>) baseDao.queryList(DrivingAccount.class,SQL+limit,false);
