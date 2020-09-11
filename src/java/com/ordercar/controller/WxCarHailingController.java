@@ -2,6 +2,7 @@ package com.ordercar.controller;
 
 
 import com.ordercar.utils.AllowOrigin;
+import com.ordercar.utils.DateUtils;
 import com.ordercar.utils.OrderUtils;
 import com.ordercar.vo.*;
 import com.summaryday.framework.d.IBaseDao;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -244,11 +246,26 @@ public class WxCarHailingController {
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         try {
-            String updateSql = "UPDATE `ordercar`.`tbl_order` SET  `status` = '0' WHERE `orderId` = '"+orderId+"'";
-            int cnt = baseDao.executeCUD(updateSql);
-            if(cnt>0){
-                resultData.put("code", 200);//成功
-                resultData.put("info", "操作成功！");
+            String sql = "SELECT * FROM tbl_order WHERE `orderId` = '"+orderId+"' ORDER BY tbl_order.timeSlot ASC";
+            List<Order> list = (List<Order>) baseDao.queryTables(Order.class, new String[]{"tbl_order"}, sql, false);
+            String time = "";
+            if(null!=list && list.size()>0){
+                Order order = list.get(0);
+                String timeSlot = order.getTimeSlot().split("-")[0];
+                time = order.getTime()+" "+timeSlot+":00";
+                long t = 6*60*60;//6小时
+                long t1 = DateUtils.getDistance(time, DateUtils.doConvertToString(new Date()));
+                if(t1 > t && DateUtils.afterToSystemDate(time)){//预约时间在系统时间之后，6小时之外
+                    String updateSql = "UPDATE `ordercar`.`tbl_order` SET  `status` = '0' WHERE `orderId` = '"+orderId+"'";
+                    int cnt = baseDao.executeCUD(updateSql);
+                    if(cnt>0){
+                        resultData.put("code", 200);//成功
+                        resultData.put("info", "操作成功！");
+                    }
+                }else{
+                    resultData.put("code", 400);//成功
+                    resultData.put("info", "操作失败,已经超过时效，无法取消预约！");
+                }
             }
         } catch (Exception e) {
             log.error("获取设置时间段配置信息异常："+e);
