@@ -149,7 +149,11 @@ public class WxCarHailingController {
             //校验时间段是否已经预约过
             TimeSet timeSet= (TimeSet) baseDao.load(TimeSet.class, "where drivingId = '"+drivingId+"'" , false);
             if(null!=timeSet){
-                number = Integer.parseInt(timeSet.getNumber());
+                if("0".equals(timeSet.getIsNumber())){//不允许多个时间段
+                    number = 1;
+                }else{
+                    number = Integer.parseInt(timeSet.getNumber());//允许多个时间段,获取允许几个时间段
+                }
                 if(timeSlotIdArr.length>number){
                     log.info("当前手机号码超出了限制次数：number:"+number+",cnt:"+timeSlotIdArr.length);
                     resultData.put("code", 400);//失败
