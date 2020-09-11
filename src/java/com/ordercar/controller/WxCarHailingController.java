@@ -76,19 +76,19 @@ public class WxCarHailingController {
             }
             sql = sql +" ORDER BY tbl_carinfo.orderno asc";
             List<CarInfoVo> list = (List<CarInfoVo>) baseDao.queryTables(CarInfoVo.class,new String[] {"tbl_carinfo",},sql,false);
-            countList = getCarInfoVoList(list,drivingId,time);//拼接历史预约量以及余量
+            countList = getCarInfoVoList(list,drivingId,time,type);//拼接历史预约量以及余量
         } catch (Exception e) {
             log.error("车辆信息列表异常："+e);
         }
         return countList;
     }
     //拼接历史预约量，以及余量
-    private List<CarInfoVo> getCarInfoVoList(List<CarInfoVo> list,String drivingId,String time) throws Exception {
+    private List<CarInfoVo> getCarInfoVoList(List<CarInfoVo> list,String drivingId,String time,String type) throws Exception {
         if(null==list){
             return new ArrayList<>();
         }
         int allNumber = 0;
-        String sql = "SELECT * from tbl_time_slot WHERE tbl_time_slot.drivingId = '"+drivingId+"' AND tbl_time_slot.`status` = '1'";
+        String sql = "SELECT * from tbl_time_slot WHERE tbl_time_slot.drivingId = '"+drivingId+"' and tbl_time_slot.type = '"+type+"' AND tbl_time_slot.`status` = '1'";
         List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
         if(null!=countList&&countList.size()>0){
             allNumber = countList.size();
@@ -116,15 +116,17 @@ public class WxCarHailingController {
     // 拉取预约时间段信息列表
     @RequestMapping(value = "/getRemainderDetail")
     @ResponseBody
-    public Map<String,Object> getRemainderDetail(@RequestParam String drivingId,@RequestParam String carinfoId,HttpServletResponse resp){
+    public Map<String,Object> getRemainderDetail(@RequestParam String drivingId, @RequestParam String carinfoId,
+                                                 @RequestParam String time,@RequestParam String type,
+                                                 HttpServletResponse resp){
         AllowOrigin.AllowOrigin(resp);
         resultData.clear();
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         List<RemainderDetailVo> times = new ArrayList<>();
         try { String sql = "SELECT * from (SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber FROM tbl_time_slot " +
-                "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' " +
-                "WHERE tbl_time_slot.drivingId = '"+drivingId+"' ORDER BY tbl_time_slot.startTime ASC ) a";
+                "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' AND tbl_order.time = '"+time+"' " +
+                "WHERE tbl_time_slot.drivingId = '"+drivingId+"' AND tbl_time_slot.type = '"+type+"' ORDER BY tbl_time_slot.startTime ASC ) a";
             times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);
             resultData.put("code", 200);//成功
             resultData.put("info", "操作成功！");
