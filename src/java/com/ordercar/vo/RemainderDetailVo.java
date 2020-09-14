@@ -9,5 +9,6 @@ public class RemainderDetailVo {
     private String endTime;//结算时间
     private String reservedNumber;//已预约
     private String curtime;//当前系统时间
+    private String status;//0停用，1启用
 
 }
