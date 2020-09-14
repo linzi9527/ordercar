@@ -64,7 +64,7 @@ public class WxCarHailingController {
         AllowOrigin.AllowOrigin(resp);
         List<CarInfoVo> countList = new ArrayList<>();
         try {
-            String sql = "select tbl_carinfo.id,tbl_carinfo.carimg,tbl_carinfo.carname,tbl_carinfo.cartype from tbl_carinfo where 1 = 1 ";
+            String sql = "select tbl_carinfo.id,tbl_carinfo.carimg,tbl_carinfo.carname,tbl_carinfo.cartype from tbl_carinfo where tbl_carinfo.status = '1' ";
             if(null!=drivingId && "" != drivingId){
                 sql = sql +" and tbl_carinfo.belong = '"+drivingId+"'";
             }
@@ -88,28 +88,27 @@ public class WxCarHailingController {
         if(null==list){
             return new ArrayList<>();
         }
-        int allNumber = 0;
-        String sql = "SELECT * from tbl_time_slot WHERE tbl_time_slot.drivingId = '"+drivingId+"' and tbl_time_slot.type = '"+type+"' AND tbl_time_slot.`status` = '1'";
-        List<TimeSlot> countList= (List<TimeSlot>) baseDao.queryList(TimeSlot.class,sql,false);
-        if(null!=countList&&countList.size()>0){
-            allNumber = countList.size();
-        }
         for(int i = 0;i<list.size();i++){
             CarInfoVo carInfoVo = list.get(i);
-            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"' and tbl_order.status = '1'";
+            String sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"' and tbl_order.status = '1'";
             List<Order> historyOrdersList= (List<Order>) baseDao.queryList(Order.class,sql,false);
             if(null!=historyOrdersList&&historyOrdersList.size()>0){
                 carInfoVo.setHistoryNumber(historyOrdersList.size()+"");
             }else{
                 carInfoVo.setHistoryNumber("0");
             }
-            sql = "SELECT * from tbl_order WHERE tbl_order.carinfoId = '"+carInfoVo.getId()+"' and tbl_order.status = '1' AND tbl_order.time = '"+time+"'";
-            List<Order> ordersList= (List<Order>) baseDao.queryList(Order.class,sql,false);
-            if(null!=ordersList&&ordersList.size()>0){
-                int surplusNumber = allNumber-ordersList.size();
-                carInfoVo.setSurplusNumber(surplusNumber+"");
+            //计算已经下单的数量
+            sql = "SELECT * FROM(SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id, 0) AS reservedNumber,curtime() AS curtime," +
+                    " tbl_time_slot.`status` FROM tbl_time_slot" +
+                    " LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId AND tbl_order.carinfoId = '"+carInfoVo.getId()+"' " +
+                    " AND tbl_order.time = '"+time+"' AND tbl_order.`status` = '1' WHERE tbl_time_slot.drivingId = '"+drivingId+"' " +
+                    " AND tbl_time_slot.type = '0' AND tbl_time_slot.`status` ='1' AND tbl_order.id IS NULL ORDER BY tbl_time_slot.startTime ASC) a " +
+                    " WHERE CONCAT('"+time+"',' ',a.startTime) > DATE_FORMAT(now(), '%Y-%m-%d %H:%i')";
+            List<RemainderDetailVo> times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);
+            if(null!=times){
+                carInfoVo.setSurplusNumber(times.size()+"");
             }else{
-                carInfoVo.setSurplusNumber(allNumber+"");
+                carInfoVo.setSurplusNumber("0");
             }
         }
         return list;
@@ -126,7 +125,7 @@ public class WxCarHailingController {
         resultData.put("info", "操作失败！");
         List<RemainderDetailVo> times = new ArrayList<>();
         try { String sql = "SELECT * from (SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber,curtime() AS curtime,tbl_time_slot.status FROM tbl_time_slot " +
-                "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' AND tbl_order.time = '"+time+"' " +
+                "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' AND tbl_order.time = '"+time+"' and tbl_order.status='1' " +
                 "WHERE tbl_time_slot.drivingId = '"+drivingId+"' AND tbl_time_slot.type = '"+type+"' ORDER BY tbl_time_slot.startTime ASC ) a";
             times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);
             resultData.put("code", 200);//成功
