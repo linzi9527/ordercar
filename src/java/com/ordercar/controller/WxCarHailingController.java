@@ -102,7 +102,7 @@ public class WxCarHailingController {
                     " tbl_time_slot.`status` FROM tbl_time_slot" +
                     " LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId AND tbl_order.carinfoId = '"+carInfoVo.getId()+"' " +
                     " AND tbl_order.time = '"+time+"' AND tbl_order.`status` = '1' WHERE tbl_time_slot.drivingId = '"+drivingId+"' " +
-                    " AND tbl_time_slot.type = '0' AND tbl_time_slot.`status` ='1' AND tbl_order.id IS NULL ORDER BY tbl_time_slot.startTime ASC) a " +
+                    " AND tbl_time_slot.type = '"+type+"' AND tbl_time_slot.`status` ='1' AND tbl_order.id IS NULL ORDER BY tbl_time_slot.startTime ASC) a " +
                     " WHERE CONCAT('"+time+"',' ',a.startTime) > DATE_FORMAT(now(), '%Y-%m-%d %H:%i')";
             List<RemainderDetailVo> times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);
             if(null!=times){
