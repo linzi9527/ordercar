@@ -141,8 +141,8 @@ public class RemainderStatisticsController {
         resultData.put("info", "操作失败！");
         List<RemainderDetailVo> times = new ArrayList<>();
         try { String sql = "SELECT * from (SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber,curtime() AS curtime,tbl_time_slot.status FROM tbl_time_slot " +
-                "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' AND tbl_order.time = '"+time+"'" +
-                "WHERE tbl_time_slot.drivingId = '"+drivingId+"' AND tbl_time_slot.type = '"+type+"'  ORDER BY tbl_time_slot.startTime ASC ) a";
+                "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' AND tbl_order.time = '"+time+"' AND tbl_order.`status` = '1' " +
+                "WHERE tbl_time_slot.drivingId = '"+drivingId+"' AND tbl_time_slot.type = '"+type+"'  ORDER BY tbl_time_slot.startTime ASC ) a WHERE a.`status` = '1' or a.reservedNumber !='0'";
                 times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);
                 resultData.put("code", 200);//成功
                 resultData.put("info", "操作成功！");
