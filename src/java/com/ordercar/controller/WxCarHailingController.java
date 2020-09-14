@@ -4,6 +4,7 @@ package com.ordercar.controller;
 import com.ordercar.utils.AllowOrigin;
 import com.ordercar.utils.DateUtils;
 import com.ordercar.utils.OrderUtils;
+import com.ordercar.utils.SendNoticeUtil;
 import com.ordercar.vo.*;
 import com.summaryday.framework.d.IBaseDao;
 import com.summaryday.framework.db.DateUtil;
@@ -124,7 +125,7 @@ public class WxCarHailingController {
         resultData.put("code", 400);//失败
         resultData.put("info", "操作失败！");
         List<RemainderDetailVo> times = new ArrayList<>();
-        try { String sql = "SELECT * from (SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber,curtime() AS curtime FROM tbl_time_slot " +
+        try { String sql = "SELECT * from (SELECT tbl_time_slot.id,tbl_time_slot.startTime,tbl_time_slot.endTime,IFNULL(tbl_order.id,0) AS reservedNumber,curtime() AS curtime,tbl_time_slot.status FROM tbl_time_slot " +
                 "LEFT JOIN tbl_order ON tbl_time_slot.id = tbl_order.timeSlotId and tbl_order.carinfoId = '"+carinfoId+"' AND tbl_order.time = '"+time+"' " +
                 "WHERE tbl_time_slot.drivingId = '"+drivingId+"' AND tbl_time_slot.type = '"+type+"' ORDER BY tbl_time_slot.startTime ASC ) a";
             times= (List<RemainderDetailVo>) baseDao.queryTables(RemainderDetailVo.class,new String[]{"tbl_time_slot","tbl_order"},sql,false);
@@ -208,6 +209,24 @@ public class WxCarHailingController {
                 }
             }
             if(flag){
+                //给学员发微信发送
+                DrivingAccount drivingAccount= (DrivingAccount) baseDao.get(drivingId,DrivingAccount.class,false);//驾校信息
+                CarInfo carInfo= (CarInfo) baseDao.get(carinfoId,CarInfo.class,false);// 车辆信息
+                if(null!=drivingAccount && null!=carInfo){
+                    Map<String, Object> infoMap = new HashMap<String, Object>();
+                    infoMap.put("openId", openId);
+                    infoMap.put("first","尊敬的用户，您有一条新的约车信息");
+                    String typeName = type.equals("0")?"科目二":"科目三";
+                    infoMap.put("keyword1", drivingAccount.getDrivingname()+" "+typeName+" "+carInfo.getCarname()+" "+carInfo.getCartype());
+                    infoMap.put("keyword2", name);
+                    infoMap.put("keyword3", tel);
+                    infoMap.put("keyword4", time+" "+timeSlots);
+                    infoMap.put("keyword5", drivingAccount.getAddress());
+                    infoMap.put("remark", "如果您不能按时到达，请提前6小时取消预约！如违约，会对您下次约车造成影响！");
+                    SendNoticeUtil.SendNotice(infoMap, "CHYUTX", "",drivingAccount.getAppid(),drivingAccount.getAppkey());
+                }else{
+                    log.info("获取驾校,车辆信息异常");
+                }
                 resultData.put("code", 200);//成功
                 resultData.put("info", "预约成功！");
             }
