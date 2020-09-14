@@ -165,7 +165,7 @@ public class WxCarHailingController {
                     return resultData;
                 }
                 //获取当前人，当前时间预约次数是否已经超出限制次数
-                String sql = "SELECT * from tbl_order WHERE tbl_order.time = '"+time+"' and openId = '"+openId+"'";
+                String sql = "SELECT * from tbl_order WHERE tbl_order.time = '"+time+"' and openId = '"+openId+"' and status = '1'";
                 List<Order>  historyOrdersList= (List<Order>) baseDao.queryList(Order.class,sql,false);
                 if(null!=historyOrdersList&&historyOrdersList.size()>0){
                   int cnt = timeSlotIdArr.length + historyOrdersList.size();//获取总数
