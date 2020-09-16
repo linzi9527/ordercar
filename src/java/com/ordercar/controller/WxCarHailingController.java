@@ -279,6 +279,30 @@ public class WxCarHailingController {
                     String updateSql = "UPDATE `ordercar`.`tbl_order` SET  `status` = '0' WHERE `orderId` = '"+orderId+"'";
                     int cnt = baseDao.executeCUD(updateSql);
                     if(cnt>0){
+                        //学员取消约车给学员发微信发送
+                        DrivingAccount drivingAccount= (DrivingAccount) baseDao.get(order.getDrivingId(),DrivingAccount.class,false);//驾校信息
+                        CarInfo carInfo= (CarInfo) baseDao.get(order.getCarinfoId(),CarInfo.class,false);// 车辆信息
+                        if(null!=drivingAccount && null!=carInfo){
+                            String timeSlots = "";
+                            for(int i = 0;i<list.size();i++){//拼接时间段
+                                timeSlots = timeSlots+","+list.get(i).getTimeSlot();
+                            }
+                            if(timeSlots.length()>1){
+                                timeSlots = timeSlots.substring(1);
+                            }
+                            Map<String, Object> infoMap = new HashMap<String, Object>();
+                            infoMap.put("openId", order.getOpenId());
+                            infoMap.put("first","尊敬的用户，您有一条取消预约通知");
+                            infoMap.put("keyword1", order.getName());
+                            String typeName = order.getType().equals("0")?"科目二":"科目三";
+                            infoMap.put("keyword2", drivingAccount.getDrivingname()+" "+typeName+" "+carInfo.getCarname()+" "+carInfo.getCartype());
+                            infoMap.put("keyword3", order.getTime()+" "+timeSlots);
+                            infoMap.put("keyword4", "无");
+                            infoMap.put("remark", "请知悉，感谢您的支持！");
+                            SendNoticeUtil.SendNotice(infoMap, "CHQXYUTX", "",drivingAccount.getAppid(),drivingAccount.getAppkey());
+                        }else{
+                            log.info("获取驾校,车辆信息异常");
+                        }
                         resultData.put("code", 200);//成功
                         resultData.put("info", "操作成功！");
                     }
